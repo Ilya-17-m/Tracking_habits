@@ -1,0 +1,17 @@
+
+global:
+  scape_interval: 5s
+
+
+scape_configs:
+  - job_name: 'prometheus'
+
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'fastapi'
+    dns_sd_configs:
+      - names: ['app']
+        port: 8000
+        type: A
+        refresh_interval: 30s

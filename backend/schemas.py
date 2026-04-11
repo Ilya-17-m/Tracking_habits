@@ -7,7 +7,7 @@ class HabitSchema(BaseModel):
     status: bool
     date: date
     time: time
-    object: str  # change habit
+    object: str
 
 
 class ProfileSchema(BaseModel):

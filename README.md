@@ -21,14 +21,22 @@
 + Sentry
 + Uvicorn
 + Poetry
++ Python-dotenv
++ Grafana
++ Loki
++ Prometheus
++ Sentry
 
 ## Разработка
 
-### Чтобы запустить сервер backend состовляющей выполните команды:
+### Чтобы запустить сервер backend состовляющей выполните команду:
 ``poetry run uvicorn backend.record_logic:app --port 8000``
 
-### Чтобы запустить сервер акщтеутв состовляющей выполните команды:
+### Чтобы запустить сервер frontend состовляющей выполните команду:
 ``frontend.records_commands``
+
+### Чтобы посмотреть документацию проекта перейдите по ссылке:
+``http://localhost:8000/docs#``
 
 ## Команда проекта
 

@@ -12,6 +12,7 @@ from .states import add_title_habit, delete_habit
 bot = TeleBot(BOT_TOKEN, state_storage=StateMemoryStorage())
 logger = logging.getLogger(__name__)
 
+
 @bot.message_handler(commands=["start"])
 def handle_start(message: Message):
     get_user_profile = requests.post(

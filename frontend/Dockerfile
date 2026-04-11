@@ -5,10 +5,10 @@ WORKDIR /app
 RUN pip install --upgrade pip \
     poetry==2.2.1
 
-COPY poetry.lock pyproject.toml ./
+COPY ../poetry.lock pyproject.toml ./
 
 RUN poetry install
 
-COPY /backend .
+COPY . .
 
-CMD ["poetry", "run", "gunicorn", "views:app"]
+CMD ["python", "views.py"]

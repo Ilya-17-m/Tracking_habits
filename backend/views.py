@@ -2,6 +2,7 @@ import uvicorn
 import sentry_sdk
 from fastapi import FastAPI, status, HTTPException
 from sqlalchemy import select
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from .database_conf import lifespan, SessionDep
 from .models import ProfileORM, HabitORM
@@ -15,6 +16,7 @@ sentry_sdk.init(
 )
 
 app = FastAPI(lifespan=lifespan)
+Instrumentator().instrument(app).expose(app)
 
 
 @app.post("/api/user", status_code=status.HTTP_201_CREATED)
@@ -53,11 +55,14 @@ async def create_habit(session: SessionDep, schema: HabitSchema) -> dict:
     try:
         habit = HabitORM(
             title=schema.title,
-            status=schema.status
+            status=schema.status,
+            date=schema.date,
+            time=schema.time
         )
 
         session.add(habit)
         await session.commit()
+
         return {"result": "true", "message": "Запись успешно добавлена!"}
 
     except HTTPException:
@@ -116,4 +121,4 @@ async def check_sentry():
 
 
 if __name__ == "__main__":
-    uvicorn.run("backend.tracking_habits_logic:app", host="localhost", port=8000)
+    uvicorn.run("backend.tracking_habits_logic:app")

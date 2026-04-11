@@ -13,6 +13,7 @@ profile_habit_association_table = Table(
     Column("habit_id", Integer, ForeignKey("habit.id")),
 )
 
+
 class ProfileORM(Base):
     __tablename__ = "profile"
 

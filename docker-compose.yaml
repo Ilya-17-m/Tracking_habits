@@ -1,0 +1,52 @@
+
+
+services:
+  backend:
+    container_name: tracking_habits_logic
+    build: ./backend:/app
+    ports:
+      - "8000:8000"
+    restart: always
+
+
+  bot:
+    container_name: tracking_habits_bot
+    build: ./frontend:/app
+    restart: always
+
+
+  db:
+    image: postgres:15
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - "5432:5432"
+
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+
+  grafana:
+    image: grafana/grafana:9.1.7
+    ports:
+      - "3000:3000"
+
+
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - "3100:3100"
+
+  prometheus:
+    image: prom/prometheus:v3.11.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yaml:/etc/prometheus/prometheus.yaml
