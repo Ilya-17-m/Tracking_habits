@@ -6,9 +6,9 @@ load_dotenv()
 
 sentry_dsn = os.getenv("SENTRY_DSN")
 
-user = os.getenv("POSTGRES_USER")
-password = os.getenv("POSTGRES_PASSWORD")
-database = os.getenv("POSTGRES_DATABASE")
+user = os.getenv("DATABASE_USER")
+password = os.getenv("DATABASE_PASSWORD")
+database = os.getenv("DATABASE_NAME")
 
 
 logging.config.dictConfig({

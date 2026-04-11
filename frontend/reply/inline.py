@@ -3,7 +3,7 @@ from telebot.types import (
     InlineKeyboardMarkup,
     Message
 )
-from frontend.tracking_habits_front import bot
+from frontend.views import bot
 from frontend.states import (
     change_title_habit,
     change_time_habit,

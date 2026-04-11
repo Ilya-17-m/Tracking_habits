@@ -1,4 +1,5 @@
 import requests
+import logging
 from telebot import TeleBot, StateMemoryStorage
 from telebot.types import Message
 
@@ -9,7 +10,7 @@ from .states import add_title_habit, delete_habit
 
 
 bot = TeleBot(BOT_TOKEN, state_storage=StateMemoryStorage())
-
+logger = logging.getLogger(__name__)
 
 @bot.message_handler(commands=["start"])
 def handle_start(message: Message):

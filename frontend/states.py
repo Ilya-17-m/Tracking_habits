@@ -1,7 +1,7 @@
 import requests
 from telebot.types import Message
 
-from tracking_habits_front import API_URL, bot
+from views import API_URL, bot
 
 
 def add_title_habit(message: Message):
