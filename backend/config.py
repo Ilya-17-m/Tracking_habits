@@ -10,11 +10,13 @@ sentry_dsn = os.getenv("SENTRY_DSN")
 user = os.getenv("DATABASE_USER")
 password = os.getenv("DATABASE_PASSWORD")
 database = os.getenv("DATABASE_NAME")
+SECRET_KEY = os.getenv("SECRET_KEY")
+ACCESS_COOKIE_NAME = os.getenv("ACCESS_COOKIE_NAME")
 
 
 config = AuthXConfig()
-config.JWT_SECRET_KEY = ""
-config.JWT_ACCESS_COOKIE_NAME = "my_access_token"
+config.JWT_SECRET_KEY = SECRET_KEY
+config.JWT_ACCESS_COOKIE_NAME = ACCESS_COOKIE_NAME
 config.JWT_TOKEN_LOCATION = ["cookies"]
 
 security = AuthX(config=config)
