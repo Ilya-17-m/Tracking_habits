@@ -1,13 +1,13 @@
 import uvicorn
 import sentry_sdk
-from fastapi import FastAPI, status, HTTPException
+from fastapi import FastAPI, status, HTTPException, Response
 from sqlalchemy import select, insert
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from .database_conf import lifespan, SessionDep
 from .models import ProfileORM, HabitORM, profile_habit_association_table
-from .schemas import HabitSchema, ProfileSchema
-from .config import sentry_dsn
+from .schemas import HabitSchema, ProfileSchema, UserLoginSchema
+from .config import sentry_dsn, security, config
 
 
 sentry_sdk.init(
@@ -20,13 +20,31 @@ Instrumentator().instrument(app).expose(app)
 
 
 @app.post("/api/login")
-async def login_user(session: SessionDep, schema: ProfileSchema) -> dict:
-    ...
+async def login_user(session: SessionDep, schema: UserLoginSchema, response: Response) -> dict:
+    get_profile = await session.execute(
+        select(ProfileORM).where(
+            ProfileORM.username==schema.username,
+            ProfileORM.user_id==schema.user_id,
+            ProfileORM.chat_id==schema.chat_id
+        )
+    )
+    profile = get_profile.scalar_one_or_none()
+    if profile is not None:
+        token = security.create_access_token(
+            username=schema.username,
+            chat_id=schema.chat_id,
+            user_id=schema.user_id
+        )
+        response.set_cookie(config.JWT_ACCESS_COOKIE_NAME, token)
+        return {
+            "access_token": token,
+            "message": f"Вы вошли в систему. Рады снова приветствовать вас {schema.username}"
+        }
 
-
-@app.post("/api/logout")
-async def logout_user(session: SessionDep) -> dict:
-    ...
+    return {
+        "result": "false",
+        "message": "Вы не смогли войти в систему. Профиль с вашими данными не был найден!"
+    }
 
 
 @app.post("/api/user", status_code=status.HTTP_201_CREATED)

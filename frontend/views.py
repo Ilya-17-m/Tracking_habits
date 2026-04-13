@@ -58,14 +58,15 @@ def change_command_habit(message: Message):
 
 @bot.message_handler(commands=["login"])
 def login_user(message: Message):
-    response = requests.post(f"{API_URL}/login")
-    data = response.json()
-    bot.send_message(message.chat.id, data["message"])
+    response = requests.post(
+        f"{API_URL}/api/login",
+        json={
+            "username": message.from_user.username,
+            "chat_id": message.chat.id,
+            "user_id": message.from_user.id
+        }
+    )
 
-
-@bot.message_handler(commands=["logout"])
-def logout_user(message: Message):
-    response = requests.post(f"{API_URL}/logout")
     data = response.json()
     bot.send_message(message.chat.id, data["message"])
 

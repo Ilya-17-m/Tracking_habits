@@ -16,3 +16,11 @@ class ProfileSchema(BaseModel):
     first_name: str
     chat_id: int
     user_id: int
+
+
+class UserLoginSchema(BaseModel):
+    username: str
+    last_name: str
+    first_name: str
+    chat_id: int
+    user_id: int

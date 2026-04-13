@@ -22,14 +22,14 @@ def send_a_reminder_message_to_the_user(chat_id, text):
         f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
         json={
             "chat_id": chat_id,
-            "text": f"Напоминание о вашей заметке: \n{text}"
+            "text": f"Напоминание вы должны выполнить: \n{text}"
         }
     )
 
 
 @celery_app.task
 async def check_status_habit(session: SessionDep):
-    now = datetime.now()
+    now = datetime.now().strftime("%H:%M")
 
     get_habits = await session.execute(
         select(HabitORM)
@@ -44,7 +44,7 @@ async def check_status_habit(session: SessionDep):
                 habit.profile.chat_id, habit.title
             )
 
-        elif habit.status == True and habit.time == now:
+        elif habit.status == True and habit.time > now:
             habit.status = False
             await session.commit()
 
