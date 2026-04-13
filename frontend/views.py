@@ -56,5 +56,19 @@ def change_command_habit(message: Message):
     )
 
 
+@bot.message_handler(commands=["login"])
+def login_user(message: Message):
+    response = requests.post(f"{API_URL}/login")
+    data = response.json()
+    bot.send_message(message.chat.id, data["message"])
+
+
+@bot.message_handler(commands=["logout"])
+def logout_user(message: Message):
+    response = requests.post(f"{API_URL}/logout")
+    data = response.json()
+    bot.send_message(message.chat.id, data["message"])
+
+
 if __name__ == "__main__":
     bot.infinity_polling()

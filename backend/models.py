@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, Integer, String, Boolean, Date, Time, ForeignKey
+from sqlalchemy import Table, Column, Integer, String, Boolean, Time, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, relationship
 
 
@@ -9,8 +9,8 @@ class Base(DeclarativeBase):
 profile_habit_association_table = Table(
     "profile_habit",
     Base.metadata,
-    Column("profile_id", Integer, ForeignKey("profile.id")),
-    Column("habit_id", Integer, ForeignKey("habit.id")),
+    Column("profile_id", Integer, ForeignKey("profile.id", ondelete="CASCADE")),
+    Column("habit_id", Integer, ForeignKey("habit.id", ondelete="CASCADE")),
 )
 
 
@@ -42,7 +42,7 @@ class HabitORM(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String, nullable=False)
     status = Column(Boolean, default=False)
-    date = Column(Date, nullable=False)
+    archive = Column(Boolean, default=False)
     time = Column(Time, nullable=False)
 
     profile = relationship(

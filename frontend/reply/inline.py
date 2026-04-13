@@ -1,20 +1,23 @@
+import requests
 from telebot.types import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     Message
 )
-from frontend.views import bot
+from frontend.views import bot, API_URL
 from frontend.states import (
     change_title_habit,
     change_time_habit,
-    change_date_habit
 )
+"""
+    Работа с Inline клавиатурой
+"""
 
 
 def gen_inline_markup():
     button_1 = InlineKeyboardButton(text="Название")
     button_2 = InlineKeyboardButton(text="Время")
-    button_3 = InlineKeyboardButton(text="Дата")
+    button_3 = InlineKeyboardButton(text="Подтверждение выполнения привычки")
 
     keyboard = InlineKeyboardMarkup()
     keyboard.add(
@@ -42,9 +45,26 @@ def inline_reply_change_time_habit(message: Message):
     bot.register_next_step_handler(message, change_time_habit)
 
 
-@bot.callback_query_handler(func=lambda callback_query: (callback_query.data == "Дата"))
-def inline_reply_change_date_habit(message: Message):
+@bot.callback_query_handler(func=lambda callback_query: (
+        callback_query.data == "Подтверждение статуса привычки"
+))
+def inline_reply_change_status_habit(message: Message):
     bot.send_message(
         message.chat.id, "Укажите текущее название привычки, которую хотите изменить."
     )
-    bot.register_next_step_handler(message, change_date_habit)
+    bot.register_next_step_handler(message, )
+
+
+
+
+    response = requests.put(
+        f"{API_URL}/api/habit",
+        json={
+            "object": "status"
+        }
+    )
+    data = response.json()
+    if data["result"] == "true":
+        bot.send_message(message.chat.id, data["message"])
+    else:
+        bot.send_message(message.chat.id, data["message"])

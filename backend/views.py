@@ -1,11 +1,11 @@
 import uvicorn
 import sentry_sdk
 from fastapi import FastAPI, status, HTTPException
-from sqlalchemy import select
+from sqlalchemy import select, insert
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from .database_conf import lifespan, SessionDep
-from .models import ProfileORM, HabitORM
+from .models import ProfileORM, HabitORM, profile_habit_association_table
 from .schemas import HabitSchema, ProfileSchema
 from .config import sentry_dsn
 
@@ -19,6 +19,16 @@ app = FastAPI(lifespan=lifespan)
 Instrumentator().instrument(app).expose(app)
 
 
+@app.post("/api/login")
+async def login_user(session: SessionDep, schema: ProfileSchema) -> dict:
+    ...
+
+
+@app.post("/api/logout")
+async def logout_user(session: SessionDep) -> dict:
+    ...
+
+
 @app.post("/api/user", status_code=status.HTTP_201_CREATED)
 async def create_new_profile(session: SessionDep, schema: ProfileSchema) -> dict:
     get_profile = await session.execute(
@@ -29,7 +39,7 @@ async def create_new_profile(session: SessionDep, schema: ProfileSchema) -> dict
         )
     )
     profile = get_profile.scalar_one_or_none()
-    if profile is not None:
+    if profile is None:
         try:
             create_profile = ProfileORM(
                 username=schema.username,
@@ -55,12 +65,18 @@ async def create_habit(session: SessionDep, schema: HabitSchema) -> dict:
     try:
         habit = HabitORM(
             title=schema.title,
-            status=schema.status,
-            date=schema.date,
-            time=schema.time
+            time=schema.time,
+        )
+
+        insert_habit_profile_table_values = insert(profile_habit_association_table).values(
+            profile_id=schema.user_id,
+            habit_id=habit.id
         )
 
         session.add(habit)
+        await session.commit()
+
+        await session.execute(insert_habit_profile_table_values)
         await session.commit()
 
         return {"result": "true", "message": "Запись успешно добавлена!"}
@@ -79,7 +95,7 @@ async def delete_my_habit(session: SessionDep, schema: HabitSchema) -> dict:
             )
         )
         habit = get_habit.scalar_one_or_none()
-        habit.status = False
+        habit.archive = True
         await session.commit()
 
         return {"result": "true", "message": "Привычка успешно удалена."}
@@ -102,15 +118,15 @@ async def change_habit(session: SessionDep, schema: HabitSchema):
         await session.commit()
         return {"result": "true", "message": "Название привычки успешно изменено."}
 
-    elif schema.object == "date":
-        habit.date = schema.date
-        await session.commit()
-        return {"result": "true", "message": "Дата успешно изменена."}
-
     elif schema.object == "time":
         habit.time = schema.time
         await session.commit()
         return {"result": "true", "message": "Время успешно изменено."}
+
+    elif schema.object == "status":
+        habit.status = True
+        await session.commit()
+        return {"result": "true", "message": "Вы выполнили задание. Продалжайте в том же духе!"}
 
     return {"result": "false", "message": "Что-то пошло не так."}
 

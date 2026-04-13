@@ -7,6 +7,9 @@ from frontend.views import bot
 from frontend.states import add_title_habit, delete_habit
 from frontend.reply.inline import gen_inline_markup
 
+"""
+    Работа с Keyboard клавиатурой
+"""
 
 def gen_keyboard_markup():
     button_1 = KeyboardButton(text="Создать")

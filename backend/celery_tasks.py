@@ -30,16 +30,24 @@ def send_a_reminder_message_to_the_user(chat_id, text):
 @celery_app.task
 async def check_status_habit(session: SessionDep):
     now = datetime.now()
+
     get_habits = await session.execute(
         select(HabitORM)
     )
+
     habits = get_habits.scalar().all()
+
     for habit in habits:
+
         if habit.status == False and habit.time == now:
             send_a_reminder_message_to_the_user.delay(
                 habit.profile.chat_id, habit.title
             )
 
-        elif habit.status == True:
+        elif habit.status == True and habit.time == now:
+            habit.status = False
+            await session.commit()
+
+        elif habit.archive == True:
             await session.delete(habit)
             await session.commit()

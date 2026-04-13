@@ -1,13 +1,13 @@
 from pydantic import BaseModel
-from datetime import date, time
+from datetime import time
 
 
 class HabitSchema(BaseModel):
     title: str
     status: bool
-    date: date
     time: time
     object: str
+    user_id: int
 
 
 class ProfileSchema(BaseModel):
