@@ -6,7 +6,13 @@ from prometheus_fastapi_instrumentator import Instrumentator
 
 from .database_conf import lifespan, SessionDep
 from .models import ProfileORM, HabitORM, profile_habit_association_table
-from .schemas import HabitSchema, ProfileSchema, UserLoginSchema
+from .schemas import (
+    ChangeHabitSchema,
+    ProfileSchema,
+    UserLoginSchema,
+    CreateHabitSchema,
+    DeleteHabitSchema,
+)
 from .config import sentry_dsn, security, config
 
 
@@ -70,24 +76,31 @@ async def create_new_profile(session: SessionDep, schema: ProfileSchema) -> dict
             session.add(create_profile)
             await session.commit()
 
-            return {"result": "true"}
+            return {"result": "true", "username": create_profile.first_name}
 
         except HTTPException:
             return {"result": "false", "message": "Что-то пошло не так..."}
 
-    return {"username": profile.username}
+    return {"username": profile.first_name}
 
 
-@app.post("/api/habit", status_code=status.HTTP_201_CREATED)
-async def create_habit(session: SessionDep, schema: HabitSchema) -> dict:
-    try:
+@app.post("/api/habit")
+async def create_habit(session: SessionDep, schema: CreateHabitSchema) -> dict:
+    get_profile = await session.execute(
+        select(ProfileORM.id).where(ProfileORM.user_id==schema.user_id)
+    )
+    my_id = get_profile.scalar_one_or_none()
+
+    if my_id is not None:
         habit = HabitORM(
             title=schema.title,
             time=schema.time,
+            status=False,
+            archive=False
         )
 
         insert_habit_profile_table_values = insert(profile_habit_association_table).values(
-            profile_id=schema.user_id,
+            profile_id=my_id,
             habit_id=habit.id
         )
 
@@ -99,13 +112,11 @@ async def create_habit(session: SessionDep, schema: HabitSchema) -> dict:
 
         return {"result": "true", "message": "Запись успешно добавлена!"}
 
-    except HTTPException:
-        return {"result": "false", "message": "Возникла ошибка создания!"}
-
+    return {"result": "false", "message": "Что-то пошло не так..."}
 
 
 @app.delete("/api/habit")
-async def delete_my_habit(session: SessionDep, schema: HabitSchema) -> dict:
+async def delete_my_habit(session: SessionDep, schema: DeleteHabitSchema) -> dict:
     try:
         get_habit = await session.execute(
             select(HabitORM).where(
@@ -123,7 +134,7 @@ async def delete_my_habit(session: SessionDep, schema: HabitSchema) -> dict:
     
 
 @app.put("/api/habit")
-async def change_habit(session: SessionDep, schema: HabitSchema):
+async def change_habit(session: SessionDep, schema: ChangeHabitSchema):
     get_habit = await session.execute(
         select(HabitORM).where(
             HabitORM.title==schema.title
@@ -132,7 +143,7 @@ async def change_habit(session: SessionDep, schema: HabitSchema):
     habit = get_habit.scalar_one_or_none()
 
     if schema.object == "title":
-        habit.title = schema.title
+        habit.title = schema.new_title
         await session.commit()
         return {"result": "true", "message": "Название привычки успешно изменено."}
 
