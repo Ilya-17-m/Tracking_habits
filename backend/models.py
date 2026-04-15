@@ -1,4 +1,56 @@
-from sqlalchemy import Table, Column, Integer, String, Boolean, Time, ForeignKey
+from sqlalchemy import Table, Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy.orm import DeclarativeBase, relationship
+
+
+class Base(DeclarativeBase):
+    pass
+
+
+profile_habit_association_table = Table(
+    "profile_habit",
+    Base.metadata,
+    Column("profile_id", Integer, ForeignKey("profile.id", ondelete="CASCADE")),
+    Column("habit_id", Integer, ForeignKey("habit.id", ondelete="CASCADE")),
+)
+
+
+class ProfileORM(Base):
+    __tablename__ = "profile"
+
+    id = Column(Integer, primary_key=True)
+    username = Column(String, nullable=False)
+    last_name = Column(String, nullable=False)
+    first_name = Column(String, nullable=False)
+    chat_id = Column(Integer, nullable=False)
+    user_id = Column(Integer, nullable=False)
+
+    habit = relationship(
+        "HabitORM",
+        secondary=profile_habit_association_table,
+        back_populates="profile"
+    )
+
+    def __repr__(self):
+        return f"Profile(username: {self.username})"
+
+
+class HabitORM(Base):
+    __tablename__ = "habit"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    title = Column(String, nullable=False)
+    status = Column(Boolean, default=False)
+    archive = Column(Boolean, default=False)
+    time = Column(String, nullable=False)
+
+    profile = relationship(
+        "ProfileORM",
+        secondary=profile_habit_association_table,
+        back_populates="habit"
+    )
+
+    def __repr__(self):
+        return f"Habit(title: {self.title})"from sqlalchemy import Table, Column, Integer, String, Boolean, Time, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, relationship
 
 
