@@ -25,6 +25,8 @@ services:
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
     ports:
       - "5432:5432"
+    networks:
+      - appnet
 
 
   redis:
@@ -37,12 +39,16 @@ services:
     image: grafana/grafana:9.1.7
     ports:
       - "3000:3000"
+    networks:
+      - appnet
 
 
   loki:
     image: grafana/loki:latest
     ports:
       - "3100:3100"
+    networks:
+      - appnet
 
   prometheus:
     image: prom/prometheus:v3.11.0
@@ -50,3 +56,8 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus.yaml:/etc/prometheus/prometheus.yaml
+    networks:
+      - appnet
+
+networks:
+  appnet:

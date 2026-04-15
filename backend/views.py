@@ -7,7 +7,9 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from .database_conf import lifespan, SessionDep
 from .models import ProfileORM, HabitORM, profile_habit_association_table
 from .schemas import (
-    ChangeHabitSchema,
+    ChangeTitleHabitSchema,
+    ChangeTimeHabitSchema,
+    ChangeStatusHabitSchema,
     ProfileSchema,
     UserLoginSchema,
     CreateHabitSchema,
@@ -131,10 +133,34 @@ async def delete_my_habit(session: SessionDep, schema: DeleteHabitSchema) -> dic
 
     except HTTPException:
         return {"result": "false", "message": "Не удалось удалить привычку."}
-    
 
-@app.put("/api/habit")
-async def change_habit(session: SessionDep, schema: ChangeHabitSchema):
+
+@app.patch("/api/habit/title")
+async def change_title_habit(
+        session: SessionDep,
+        schema: ChangeTitleHabitSchema
+) -> dict[str, str]:
+
+    get_habit = await session.execute(
+        select(HabitORM).where(
+            HabitORM.title==schema.title
+        )
+    )
+    habit = get_habit.scalar_one_or_none()
+    if habit is not None:
+        habit.title = schema.new_title
+        await session.commit()
+        return {"result": "true", "message": "Название привычки успешно изменено."}
+
+    return {"result": "false", "message": "Что-то пошло не так."}
+
+
+@app.patch("api/habit/time")
+async def change_time_habit(
+        session: SessionDep,
+        schema: ChangeTimeHabitSchema
+) -> dict[str, str]:
+
     get_habit = await session.execute(
         select(HabitORM).where(
             HabitORM.title==schema.title
@@ -142,20 +168,38 @@ async def change_habit(session: SessionDep, schema: ChangeHabitSchema):
     )
     habit = get_habit.scalar_one_or_none()
 
-    if schema.object == "title":
-        habit.title = schema.new_title
-        await session.commit()
-        return {"result": "true", "message": "Название привычки успешно изменено."}
+    if habit is not None:
 
-    elif schema.object == "time":
         habit.time = schema.time
         await session.commit()
         return {"result": "true", "message": "Время успешно изменено."}
 
-    elif schema.object == "status":
-        habit.status = True
+    return {"result": "false", "message": "Что-то пошло не так."}
+
+
+@app.patch("/api/status")
+async def change_status_habit(
+        session: SessionDep,
+        schema: ChangeStatusHabitSchema
+) -> dict[str, str]:
+
+    get_habit = await session.execute(
+        select(HabitORM).where(
+            HabitORM.title==schema.title,
+            HabitORM.archive==False
+        )
+    )
+    habit = get_habit.scalar_one_or_none()
+
+    if habit is not None:
+        if schema.status == "Выполнено":
+            habit.status = True
+            await session.commit()
+            return {"result": "true", "message": "Вы выполнили задание. Продалжайте в том же духе!"}
+
+        habit.status = False
         await session.commit()
-        return {"result": "true", "message": "Вы выполнили задание. Продалжайте в том же духе!"}
+        return {"result": "true", "message": "Вы не выполнили задание"}
 
     return {"result": "false", "message": "Что-то пошло не так."}
 

@@ -1,13 +1,19 @@
 from pydantic import BaseModel
 
 
-class ChangeHabitSchema(BaseModel):
+class ChangeTitleHabitSchema(BaseModel):
     title: str
     new_title: str
-    status: bool
+
+
+class ChangeTimeHabitSchema(BaseModel):
+    title: str
     time: str
-    object: str
-    user_id: int
+
+
+class ChangeStatusHabitSchema(BaseModel):
+    title: str
+    status: str
 
 
 class CreateHabitSchema(BaseModel):
@@ -43,20 +49,4 @@ class HabitSchema(BaseModel):
     status: bool
     time: time
     object: str
-    user_id: int
-
-
-class ProfileSchema(BaseModel):
-    username: str
-    last_name: str
-    first_name: str
-    chat_id: int
-    user_id: int
-
-
-class UserLoginSchema(BaseModel):
-    username: str
-    last_name: str
-    first_name: str
-    chat_id: int
     user_id: int
