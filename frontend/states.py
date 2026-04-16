@@ -11,10 +11,10 @@ def add_title_habit(message: Message):
         message.chat.id,
         "Отлично. Теперь введите время для напоминаний в формате 00:00"
     )
-    bot.register_next_step_handler(message, add_time_habit, title)
+    bot.register_next_step_handler(message, create_habit, title)
 
 
-def add_time_habit(message: Message, title: str):
+def create_habit(message: Message, title: str):
     time = message.text
 
     response = requests.post(
