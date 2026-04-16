@@ -10,7 +10,7 @@ from states import add_title_habit, delete_habit
 @bot.message_handler(commands=["start"])
 def handle_start(message: Message):
     get_user_profile = requests.post(
-        f"{API_URL}/api/users",
+        f"{API_URL}/api/user",
         json={
             "user_id": message.from_user.id,
             "username": message.from_user.username,

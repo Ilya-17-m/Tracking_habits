@@ -177,7 +177,7 @@ async def change_time_habit(
     return {"result": "false", "message": "Что-то пошло не так."}
 
 
-@app.patch("/api/status")
+@app.patch("/api/habit/status")
 async def change_status_habit(
         session: SessionDep,
         schema: ChangeStatusHabitSchema

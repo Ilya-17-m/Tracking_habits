@@ -56,14 +56,11 @@ def get_new_title_for_change_title_habit(message: Message):
 
 def change_title_habit(message: Message, title: str):
     new_title = message.text
-    response = requests.put(
-        f"{API_URL}/api/habit",
+    response = requests.patch(
+        f"{API_URL}/api/habit/title",
         json={
             "title": title,
             "new_title": new_title,
-            "object": "title",
-            "status": False,
-            "time": "",
         }
     )
 
@@ -85,14 +82,11 @@ def get_time_for_change_time_habit(message: Message):
 def change_time_habit(message: Message, title):
     time = message.text
 
-    response = requests.put(
-        f"{API_URL}/api/habit",
+    response = requests.patch(
+        f"{API_URL}/api/habit/time",
         json={
             "title": title,
-            "object": "time",
             "time": time,
-            "new_title": "",
-            "status": False
         }
     )
 
@@ -117,14 +111,11 @@ def get_status_for_change_status_habit(message: Message):
 
 def change_status_habit(message: Message, title):
     status = message.text
-    response = requests.post(
-        f"{API_URL}/api/habit",
+    response = requests.patch(
+        f"{API_URL}/api/habit/status",
         json={
             "title": title,
             "status": status,
-            "object": "status",
-            "new_title": "",
-            "time": "",
         }
     )
     data = response.json()
