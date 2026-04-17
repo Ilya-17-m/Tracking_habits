@@ -45,7 +45,6 @@ async def login_user(session: SessionDep, schema: UserLoginSchema, response: Res
         )
         response.set_cookie(config.JWT_ACCESS_COOKIE_NAME, token)
         return {
-            "access_token": token,
             "message": f"Вы вошли в систему. Рады снова приветствовать вас {schema.username}"
         }
 
@@ -86,7 +85,7 @@ async def create_new_profile(session: SessionDep, schema: ProfileSchema) -> dict
     return {"username": profile.first_name}
 
 
-@app.post("/api/habit")
+@app.post("/api/habit", status_code=status.HTTP_201_CREATED)
 async def create_habit(session: SessionDep, schema: CreateHabitSchema) -> dict:
     get_profile = await session.execute(
         select(ProfileORM.id).where(ProfileORM.user_id==schema.user_id)
