@@ -1,9 +1,10 @@
 
 
 services:
+
   backend:
     container_name: tracking_habits_logic
-    build: ./backend:/app
+    build: ./backend
     ports:
       - "8000:8000"
     restart: always
@@ -12,11 +13,22 @@ services:
       options:
         loki-url: http://localhost:3100/loki/api/v1/push
 
+    networks:
+      - appnet
+    depends_on:
+      - db
+      - redis
+
 
   bot:
     container_name: tracking_habits_bot
     build: ./frontend:/app
     restart: always
+    networks:
+      - appnet
+    depends_on:
+      - db
+      - redis
 
 
   db:
@@ -37,6 +49,8 @@ services:
     image: redis:7
     ports:
       - "6379:6379"
+    networks:
+      - appnet
 
 
   grafana:
